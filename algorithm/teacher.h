@@ -2,6 +2,7 @@
 #define TEACHER_H
 
 #include <QObject>
+#include <QtCore>
 
 class teacher
 {
@@ -13,9 +14,10 @@ class teacher
 
     unsigned int m_ID;
     QString m_name;
+    QSet<int> m_subjectsCanTeach;
 
     bool init(unsigned int id, QString name,
-              unsigned int lectureLoad, unsigned int practiceLoad);
+              unsigned int lectureLoad, unsigned int practiceLoad, QSet<int> subjectsCanTeach);
 
 public:
     explicit teacher();
@@ -47,7 +49,7 @@ public:
     }
 
     static teacher* create(unsigned int id, QString name,
-                           unsigned int lectureLoad, unsigned int practiceLoad);
+                           unsigned int lectureLoad, unsigned int practiceLoad, QSet<int> subjectsCanTeach);
     
 };
 
