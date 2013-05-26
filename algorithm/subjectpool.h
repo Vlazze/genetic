@@ -13,6 +13,10 @@ class subjectPool
 public:
     explicit subjectPool();
 
+    ~subjectPool(){
+        qDeleteAll(m_pool);
+    }
+
     static subjectPool* createWithVector(QVector<subject *> pool);
 
     subject getRandomSubject(group *grp) const;

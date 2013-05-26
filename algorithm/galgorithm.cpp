@@ -1,3 +1,4 @@
+#include <QtCore>
 #include "galgorithm.h"
 #include "subjectpool.h"
 #include "grouppool.h"
@@ -9,15 +10,53 @@
 
 GAlgorithm::GAlgorithm()
 {
+    m_groupPool = NULL;
+    m_subjectPool = NULL;
+    m_teacherPool = NULL;
+    m_roomPool = NULL;
 }
 
-QVector< QVector<lesson*> > GAlgorithm::generateGenome(){
+GAlgorithm::~GAlgorithm(){
+    QVector< QVector <lesson*> > obj;
+    QVector<lesson*> vec;
+    for (int i = 0; i < m_population.count(); i++){
+        obj = m_population[i];
+        for (int j = 0; j < obj.count(); j++){
+            vec = obj[j];
+            qDeleteAll(vec);
+        }
+    }
+}
 
+//init pools with concrete values
+void GAlgorithm::setPools(groupPool *gp, subjectPool *sp, teacherPool *tp, roomPool *rp){
+    m_groupPool = gp;
+    m_subjectPool = sp;
+    m_teacherPool = tp;
+    m_roomPool = rp;
+}
+
+//init pools with random values
+void GAlgorithm::setPoolsWithRandomValues(int subjCount, int roomCount, int teacherCount, int groupCount){
     //parameters
-    int subjCount = 20;
-    int roomCount = 20;
-    int teacherCount = 10;
-    int groupCount = 12;
+//    int subjCount = 40;
+//    int roomCount = 20;
+//    int teacherCount = 10;
+//    int groupCount = 12;
+
+    //memory cleaning
+    if(m_groupPool){
+        delete m_groupPool;
+    }
+    if(m_subjectPool){
+        delete m_subjectPool;
+    }
+    if(m_teacherPool){
+        delete m_teacherPool;
+    }
+    if(m_roomPool){
+        delete m_roomPool;
+    }
 
     //test
         QVector<subject *> subjPool;
@@ -25,12 +64,13 @@ QVector< QVector<lesson*> > GAlgorithm::generateGenome(){
         QVector<teacher *> teacherPoolInst;
         QVector<group *> groupPoolInst;
 
-        qsrand(1);
         for (int i = 0; i < subjCount; i++){
 
             QSet<int> semesters;
-            semesters.insert((qrand()%8)+1);
-            semesters.insert((qrand()%8)+1);
+            int randSemester = (qrand()%8)+1;
+            semesters.insert(randSemester);
+            semesters.insert(randSemester+1);
+
             subject *subj = subject::create(i, "Subject"+QString::number(i), qrand()%2, qrand()%10,
                                             practiceSubject, semesters);
             subjPool.push_back(subj);
@@ -69,32 +109,31 @@ QVector< QVector<lesson*> > GAlgorithm::generateGenome(){
         groupPoolInst.push_back(group::create(11, 2, 7, 0));
         groupPoolInst.push_back(group::create(12, 3, 7, 0));
 
-        groupPool *groupPool1 = groupPool::createWithVector(groupPoolInst);
-        //group grp = groupPool1->getGroupPool();
+        m_groupPool = groupPool::createWithVector(groupPoolInst);
+        m_subjectPool = subjectPool::createWithVector(subjPool);
+        m_teacherPool = new teacherPool(teacherPoolInst);
+        m_roomPool = new roomPool(roomPoolInst);
+}
 
-        subjectPool *subjectPool1 = subjectPool::createWithVector(subjPool);
-        //subject sbj = subjectPool1->getRandomSubject(&grp);
-
-        teacherPool *teacherPool1 = new teacherPool(teacherPoolInst);
-        roomPool *roomPool1 = new roomPool(roomPoolInst);
-
+//genome generator
+QVector< QVector<lesson*> > GAlgorithm::generateGenome(){
 
         QVector< QVector<lesson*> > schedule;
-        for (int i = 0; i < groupPool1->getCount(); i++) {
+        for (int i = 0; i < m_groupPool->getCount(); i++) {
             schedule.append(QVector<lesson*>());
         }
 
-        for (int i = 0; i < groupPool1->getCount(); i++){
-            for (int j = 0; j < subjectPool1->getCount(); j++){
-                subject* sbj = subjectPool1->getSubjectPool().at(j);
-                if (!sbj->getSemesters().contains(groupPool1->getGroupPool().at(i)->getSemester())){
+        for (int i = 0; i < m_groupPool->getCount(); i++){
+            for (int j = 0; j < m_subjectPool->getCount(); j++){
+                subject* sbj = m_subjectPool->getSubjectPool().at(j);
+                if (!sbj->getSemesters().contains(m_groupPool->getGroupPool().at(i)->getSemester())){
                     continue;
                 }
                 for (int k = 0; k < sbj->getCount(); k++){  //???
-                    lesson* lsn = new lesson(groupPool1->getGroupPool().at(i),
-                                             subjectPool1->getSubjectPool().at(j),
-                                             teacherPool1->getRandomTeacher(),
-                                             roomPool1->getRandomRoom(),
+                    lesson* lsn = new lesson(m_groupPool->getGroupPool().at(i),
+                                             m_subjectPool->getSubjectPool().at(j),
+                                             m_teacherPool->getRandomTeacher(),
+                                             m_roomPool->getRandomRoom(),
                                              timePoint::getRandomTimePoint()
                                              );
                     schedule[i].append(lsn);
@@ -107,6 +146,14 @@ QVector< QVector<lesson*> > GAlgorithm::generateGenome(){
         return schedule;
 }
 
-void GAlgorithm::generatePopulation(){
+void GAlgorithm::generatePopulation(int populationCount){
+    m_populationCount = populationCount;
 
+    for (int i = 0; i < m_populationCount; i++){
+        m_population.push_back(generateGenome());
+    }
+}
+
+QVector< QVector<lesson *> > GAlgorithm::getPopulationAtIndex(int index){
+    return m_population.at(index);
 }

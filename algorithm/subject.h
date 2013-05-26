@@ -30,6 +30,9 @@ private:
 public:
     explicit subject();
     
+    ~subject(){
+    }
+
     //getters & setters
     unsigned int getCount(){
         return m_count;

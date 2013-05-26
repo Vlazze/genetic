@@ -7,6 +7,7 @@
 #include <QDialog>
 #include "dboperations.h"
 #include "subjecthoursview.h"
+#include "schedule_constructor.h"
 
 namespace Ui {
 class MainWindow;
@@ -60,6 +61,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     SubjectHoursView *subjectHoursView;
+    schedule_constructor* m_algorithmForm;
 };
 
 #endif // MAINWINDOW_H

@@ -13,6 +13,10 @@ public:
 
     explicit groupPool();
 
+    ~groupPool(){
+        qDeleteAll(m_pool);
+    }
+
     static groupPool* createWithVector(QVector<group *> pool);
 
     QVector<group *> getGroupPool();

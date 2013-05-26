@@ -21,6 +21,9 @@ class teacher
 
 public:
     explicit teacher();
+
+    ~teacher(){
+    }
     
     //getters & setters
     unsigned int getLectureLoad(){

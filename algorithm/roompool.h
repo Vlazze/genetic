@@ -11,6 +11,10 @@ class roomPool
 public:
     roomPool(QVector<room *> pool);
 
+    ~roomPool(){
+        qDeleteAll(m_pool);
+    }
+
     room* getRandomRoom();
 
     //getters & setters

@@ -1222,6 +1222,6 @@ void MainWindow::on_action_triggered()
 
 void MainWindow::on_open_action_2_triggered()
 {
-    schedule_constructor* algorithmForm = new schedule_constructor();
-    algorithmForm->show();
+    m_algorithmForm = new schedule_constructor();
+    m_algorithmForm->show();
 }

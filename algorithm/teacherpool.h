@@ -11,6 +11,10 @@ class teacherPool
 public:
     teacherPool(QVector<teacher *> tch);
 
+    ~teacherPool(){
+        qDeleteAll(m_pool);
+    }
+
     teacher* getRandomTeacher();
 
     //getters & setters
