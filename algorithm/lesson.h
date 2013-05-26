@@ -18,7 +18,7 @@ class lesson
     room *m_room;
 
     timePoint *m_timePoint;
-    int m_timeIndex;
+    unsigned int m_timeIndex;
 
 public:
     lesson(group* grp, subject* sbj, teacher* tchr, room* rm, int time);
@@ -41,6 +41,9 @@ public:
     }
     timePoint* getTimePoint(){
         return m_timePoint;
+    }
+    unsigned int getTimeIndex(){
+        return m_timeIndex;
     }
 
 };

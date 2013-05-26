@@ -9,12 +9,13 @@ class GAlgorithm
     int m_populationCount;
     int m_iterationCount;
     int m_mutationRate;
-    QVector<lesson *> m_population;
+    QVector<QVector<lesson *> > m_population;
 
 public:
     GAlgorithm();
 
     void generatePopulation();
+    QVector<QVector<lesson *> > generateGenome();
 };
 
 #endif // GALGORITHM_H

@@ -25,8 +25,8 @@ timePoint* timePoint::create(unsigned int timeIndex){
 
 unsigned int timePoint::getRandomTimePoint(){
     //qt random initialization
-    QTime time = QTime::currentTime();
-    qsrand((uint)time.msec());
+//    QTime time = QTime::currentTime();
+//    qsrand((uint)time.msec());
 
     return (qrand() % (timePoint::s_maxOverallTimeIndex - 1)) + 1;
 }

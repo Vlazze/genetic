@@ -20,8 +20,8 @@ subjectPool* subjectPool::createWithVector(QVector<subject *> pool){
 
 subject subjectPool::getRandomSubject(group *grp) const{
     //qt random initialization
-    QTime time = QTime::currentTime();
-    qsrand((uint)time.msec());
+//    QTime time = QTime::currentTime();
+//    qsrand((uint)time.msec());
 
     subject *subj = NULL;
 
