@@ -10,7 +10,7 @@ class timePoint
 public:
     explicit timePoint();
 
-    static const unsigned int s_maxOverallTimeIndex = 60;
+    static const unsigned int s_maxOverallTimeIndex = 59;
     static unsigned int getRandomTimePoint();
     static timePoint* create(unsigned int timeIndex);
     

@@ -16,6 +16,9 @@ public:
     }
 
     teacher* getRandomTeacher();
+    teacher* getTeacherAtIndex(int index){
+        return m_pool.at(index);
+    }
 
     //getters & setters
     int getCount(){

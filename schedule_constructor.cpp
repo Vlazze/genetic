@@ -16,6 +16,11 @@ schedule_constructor::schedule_constructor(QWidget *parent) :
     ui->pushButtonNextGenome->setEnabled(false);
     ui->spinBoxPopulationNavigation->setEnabled(false);
     ui->pushButton_2->setEnabled(false);
+    ui->spinBoxFitnessValue->setEnabled(false);
+    ui->pushButton_3->setEnabled(false);
+    ui->pushButtonFitnessSort->setEnabled(false);
+    ui->pushButtonGoAlgorithm->setEnabled(false);
+    ui->spinBoxIterationCount->setEnabled(false);
 
     //make empty table
     // set table TEACHER_LIMITS appearance
@@ -46,19 +51,19 @@ schedule_constructor::schedule_constructor(QWidget *parent) :
         if(cnt > 5) {
             cnt = 1;
         }
-        if(i <= 5) dayName = "Monday ";
-        else if (i > 5 && i <=10) dayName = "Tuessday ";
-        else if (i > 10 && i <=15) dayName = "Wednesday ";
-        else if (i > 15 && i <=20) dayName = "Thursday ";
-        else if (i > 20 && i <=25) dayName = "Friday ";
-        else if (i > 25 && i <=30) dayName = "Saturday ";
+        if(i <= 5) dayName = QObject::trUtf8("Понедельник ");
+        else if (i > 5 && i <=10) dayName = QObject::trUtf8("Вторник ");
+        else if (i > 10 && i <=15) dayName = QObject::trUtf8("Среда ");
+        else if (i > 15 && i <=20) dayName = QObject::trUtf8("Четврег ");
+        else if (i > 20 && i <=25) dayName = QObject::trUtf8("Пятница ");
+        else if (i > 25 && i <=30) dayName = QObject::trUtf8("Суббота ");
 
-        else if (i > 30 && i <=35) dayName = "Monday ";
-        else if (i > 35 && i <=40) dayName = "Tuessday ";
-        else if (i > 40 && i <=45) dayName = "Wednesday ";
-        else if (i > 45 && i <=50) dayName = "Thursday ";
-        else if (i > 50 && i <=55) dayName = "Friday ";
-        else if (i > 55 && i <=60) dayName = "Saturday ";
+        else if (i > 30 && i <=35) dayName = QObject::trUtf8("Понедельник ");
+        else if (i > 35 && i <=40) dayName = QObject::trUtf8("Вторник ");
+        else if (i > 40 && i <=45) dayName = QObject::trUtf8("Среда ");
+        else if (i > 45 && i <=50) dayName = QObject::trUtf8("Четврег ");
+        else if (i > 50 && i <=55) dayName = QObject::trUtf8("Пятница ");
+        else if (i > 55 && i <=60) dayName = QObject::trUtf8("Суббота ");
         limitVerHeaders.push_back(dayName + QString::number(cnt));
 
         cnt++;
@@ -81,24 +86,39 @@ void schedule_constructor::setScheduleValue(QVector<QVector<lesson *> > schedule
     ui->scheduleTable->clearContents();
 
     //QVector< QVector<lesson*> > schedule;
-    schedule = m_algorithm->generateGenome();
+    //schedule = m_algorithm->generateGenome();
 
     for (int i = 0; i < schedule.count(); i++){
         QVector<lesson*> currentGroup = schedule[i];
         for (int j = 0; j < currentGroup.count(); j++){
             QString roomId = QString::number(currentGroup[j]->getRoom()->getID());
-            QString subjId = QString::number(currentGroup[j]->getSubject()->getID());
-            QString teachId = QString::number(currentGroup[j]->getTeacher()->getID());
-            QString resultString = "Room - " + roomId + "|Subj - " + subjId + "|Teach - " + teachId;
-
-            //old content
-            QModelIndex index = ui->scheduleTable->model()->index(j, currentGroup[j]->getTimeIndex());
-            QString oldString = index.data().toString();
+            QString subjId = currentGroup[j]->getSubject()->getTitle();
+            QString teachId = currentGroup[j]->getTeacher()->getName();
+            QString groupId = QString::number(currentGroup[j]->getGroup()->getID());
+            QString timeStr = QString::number(currentGroup[j]->getTimeIndex());
+            QString resultString = "Room - " + roomId + "|Subj - " +
+                    subjId + "|Teach - " + teachId + "|Group: " + groupId +
+                    "|Time: " + timeStr;
 
             int timeCurrentTimeIndex = currentGroup[j]->getTimeIndex();
 
-            ui->scheduleTable->setItem(j, timeCurrentTimeIndex,
-                                       new QTableWidgetItem(oldString + "#" +resultString));//
+            //old content
+//            QModelIndex index = ui->scheduleTable->model()->index(j, currentGroup[j]->getTimeIndex());
+            QModelIndex index = ui->scheduleTable->model()->index(timeCurrentTimeIndex, i);
+
+            QString oldString = index.data().toString();
+
+            QTableWidgetItem *item = new QTableWidgetItem(oldString + "#" +resultString);
+
+            if(oldString != ""){
+                QColor col(255,0,0);
+
+                item->setBackgroundColor(col);
+            }
+
+
+
+            ui->scheduleTable->setItem(timeCurrentTimeIndex, i, item);//
 
         }
     }
@@ -126,13 +146,24 @@ void schedule_constructor::on_pushButton_clicked()
     //spin box "Population Count" value check
     if(ui->spinBoxPopulationCount->value()){
         m_algorithm->generatePopulation(ui->spinBoxPopulationCount->value());
+        m_currentPopulationToShowIndex = 0;
         setScheduleValue(m_algorithm->getPopulationAtIndex(m_currentPopulationToShowIndex));
+
         //if more than 1 genome - show scroll button
+        ui->spinBoxPopulationNavigation->setValue(1);
+        ui->spinBoxPopulationNavigation->setMaximum(ui->spinBoxPopulationCount->value());
+        ui->pushButtonPreviousGenome->setEnabled(false);
+        ui->pushButtonFitnessSort->setEnabled(true);
+        ui->pushButtonGoAlgorithm->setEnabled(true);
+        ui->spinBoxIterationCount->setEnabled(true);
         if(m_algorithm->getPopulationCount() > 1){
             ui->pushButtonNextGenome->setEnabled(true);
             ui->spinBoxPopulationNavigation->setEnabled(true);
-            ui->spinBoxPopulationNavigation->setMaximum(ui->spinBoxPopulationCount->value());
             ui->pushButton_2->setEnabled(true);
+        } else {
+            ui->pushButtonNextGenome->setEnabled(false);
+            ui->spinBoxPopulationNavigation->setEnabled(false);
+            ui->pushButton_2->setEnabled(false);
         }
     } else {
         QMessageBox msg;
@@ -194,4 +225,64 @@ void schedule_constructor::on_pushButton_2_clicked()
         } else {
             ui->pushButtonNextGenome->setEnabled(true);
         }
+}
+
+//count fitness function for current genome
+void schedule_constructor::on_pushButton_3_clicked()
+{
+    unsigned long result = m_algorithm->fitnessFunction(
+                m_algorithm->getPopulationAtIndex(m_currentPopulationToShowIndex));
+
+    ui->spinBoxFitnessValue->setValue(result);
+}
+
+void schedule_constructor::on_tabWidget_currentChanged(int index)
+{
+    switch(index){
+        case 0:
+        break;
+
+        case 1:
+        {
+            if(m_algorithm != NULL){
+                if(m_algorithm->getPopulationCount()){
+                    ui->spinBoxFitnessValue->setEnabled(true);
+                    ui->pushButton_3->setEnabled(true);
+                } else {
+                    ui->spinBoxFitnessValue->setEnabled(false);
+                    ui->pushButton_3->setEnabled(false);
+                }
+            } else {
+                ui->spinBoxFitnessValue->setEnabled(false);
+                ui->pushButton_3->setEnabled(false);
+            }
+        }
+        break;
+    }
+
+
+}
+//woot?
+void schedule_constructor::on_pushButton_4_clicked()
+{
+
+}
+
+void schedule_constructor::on_pushButtonGoAlgorithm_clicked()
+{
+    if(m_algorithm->getPopulationCount() > 1){
+        m_algorithm->runAlgorithm(ui->spinBoxIterationCount->value());
+        m_currentPopulationToShowIndex = 0;
+        setScheduleValue(m_algorithm->getPopulationAtIndex(m_currentPopulationToShowIndex));
+        ui->spinBoxPopulationNavigation->setValue(m_currentPopulationToShowIndex + 1);
+        ui->pushButtonPreviousGenome->setEnabled(false);
+        ui->pushButtonNextGenome->setEnabled(true);
+    }
+}
+
+void schedule_constructor::on_pushButtonFitnessSort_clicked()
+{
+    m_algorithm->fitnessSortPopulation();
+    m_currentPopulationToShowIndex = 0;
+    setScheduleValue(m_algorithm->getPopulationAtIndex(m_currentPopulationToShowIndex));
 }

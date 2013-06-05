@@ -34,6 +34,17 @@ private slots:
 
     void on_pushButton_2_clicked();
 
+    //count fitness function for current genome
+    void on_pushButton_3_clicked();
+
+    void on_tabWidget_currentChanged(int index);
+
+    void on_pushButton_4_clicked();
+
+    void on_pushButtonGoAlgorithm_clicked();
+
+    void on_pushButtonFitnessSort_clicked();
+
 private:
     Ui::schedule_constructor *ui;
     GAlgorithm *m_algorithm;

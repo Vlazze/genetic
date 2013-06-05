@@ -28,5 +28,5 @@ unsigned int timePoint::getRandomTimePoint(){
 //    QTime time = QTime::currentTime();
 //    qsrand((uint)time.msec());
 
-    return (qrand() % (timePoint::s_maxOverallTimeIndex - 1)) + 1;
+    return qrand() % timePoint::s_maxOverallTimeIndex;
 }

@@ -20,6 +20,8 @@ class lesson
     timePoint *m_timePoint;
     unsigned int m_timeIndex;
 
+    unsigned long m_fitnessValue;
+
 public:
     lesson(group* grp, subject* sbj, teacher* tchr, room* rm, int time);
 
@@ -44,6 +46,9 @@ public:
     }
     unsigned int getTimeIndex(){
         return m_timeIndex;
+    }
+    unsigned long getFitnessValue(){
+        return m_fitnessValue;
     }
 
 };

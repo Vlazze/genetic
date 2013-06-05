@@ -10,5 +10,5 @@ room* roomPool::getRandomRoom(){
 //    QTime time = QTime::currentTime();
 //    qsrand((uint)time.msec());
 
-    return m_pool.at((qrand() % (m_pool.count() - 1)) +1);
+    return m_pool.at(qrand() % m_pool.count());
 }

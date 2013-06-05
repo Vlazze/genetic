@@ -21,6 +21,10 @@ public:
     int getCount(){
         return m_pool.count();
     }
+
+    room* getRoomAtIndex(int index){
+        return m_pool.at(index);
+    }
 };
 
 #endif // ROOMPOOL_H

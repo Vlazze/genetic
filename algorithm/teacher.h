@@ -51,6 +51,10 @@ public:
         return m_name;
     }
 
+    QSet<int> getSubjectCanTeach(){
+        return m_subjectsCanTeach;
+    }
+
     static teacher* create(unsigned int id, QString name,
                            unsigned int lectureLoad, unsigned int practiceLoad, QSet<int> subjectsCanTeach);
     

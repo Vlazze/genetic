@@ -142,7 +142,7 @@ QVector< QVector<lesson*> > GAlgorithm::generateGenome(){
                 sbj->resetCountCounter();
             }
         }
-        //end of test
+
         return schedule;
 }
 
@@ -156,4 +156,177 @@ void GAlgorithm::generatePopulation(int populationCount){
 
 QVector< QVector<lesson *> > GAlgorithm::getPopulationAtIndex(int index){
     return m_population.at(index);
+}
+
+unsigned long GAlgorithm::computeCollisionPenalty(QVector<QVector<lesson *> > genome){
+
+    unsigned long returnValue = 0;
+
+    //Conditions
+    //Teacher can teach this subject
+    //1 group 1 time 1 lesson
+    unsigned long timeCollisionCount = 0;
+    unsigned long teachersSubjectsCollitionCount = 0;
+    for (int i = 0; i < genome.count(); i++){
+        QVector<bool> timeMask;
+        timeMask.fill(false, 60);
+        for(int j = 0; j < genome[i].count(); j++){
+
+            //Teacher can teach this subject
+            if(!genome[i][j]->getTeacher()->getSubjectCanTeach().contains(genome[i][j]->getSubject()->getID())){
+                teachersSubjectsCollitionCount += 100000;
+            }
+
+            //1 group 1 time 1 lesson
+            if(timeMask.at(genome[i][j]->getTimeIndex()) == true){
+                timeCollisionCount += 100000;
+            } else {
+                timeMask.replace(genome[i][j]->getTimeIndex(), true);
+            }
+        }
+    }
+    returnValue += timeCollisionCount;
+    returnValue += teachersSubjectsCollitionCount;
+
+    //Conditions
+    //1 group 1 time 1 techer
+    unsigned long teachersTimeCollisionCount = 0;
+    for(int tn = 0; tn < m_teacherPool->getCount(); tn++){
+
+        teacher *currentTeacher = m_teacherPool->getTeacherAtIndex(tn);
+        QVector<bool> timeMask;
+        timeMask.fill(false, 60);
+
+        for(int i = 0; i < genome.count(); i++){
+            for(int j = 0; j < genome[i].count(); j++){
+                if(genome[i][j]->getTeacher()->getID() == currentTeacher->getID()){
+                    if(timeMask.at(genome[i][j]->getTimeIndex()) == true){
+                        teachersTimeCollisionCount += 100000;
+                    } else {
+                        timeMask.replace(genome[i][j]->getTimeIndex(), true);
+                    }
+                }
+            }
+        }
+    }
+    returnValue += teachersTimeCollisionCount;
+
+    //Conditions
+    //1 group 1 time 1 room
+    unsigned long roomTimeCollisionCount = 0;
+    for(int tn = 0; tn < m_roomPool->getCount(); tn++){
+
+        room *currentRoom = m_roomPool->getRoomAtIndex(tn);
+        QVector<bool> timeMask;
+        timeMask.fill(false, 60);
+
+        for(int i = 0; i < genome.count(); i++){
+            for(int j = 0; j < genome[i].count(); j++){
+                if(genome[i][j]->getRoom()->getID() == currentRoom->getID()){
+                    if(timeMask.at(genome[i][j]->getTimeIndex()) == true){
+                        roomTimeCollisionCount += 100000;
+                    } else {
+                        timeMask.replace(genome[i][j]->getTimeIndex(), true);
+                    }
+                }
+            }
+        }
+    }
+    returnValue += roomTimeCollisionCount;
+
+
+
+    return returnValue;
+}
+
+unsigned long GAlgorithm::computeOptimizationPenalty(QVector<QVector<lesson *> > genome){
+    return 0;
+}
+
+unsigned long GAlgorithm::fitnessFunction(QVector<QVector<lesson *> > genome){
+    return computeCollisionPenalty(genome) + computeOptimizationPenalty(genome);
+}
+
+QVector<QVector<lesson *> > GAlgorithm::crossoverFunction(QVector<QVector<lesson *> > genome1, QVector<QVector<lesson *> > genome2){
+    QVector< QVector<lesson *> > result = genome1;
+    int genomeElementsCount = genome1.count();
+    int breakPoint = qrand() % (genomeElementsCount - 2);
+    for (int i = breakPoint; i < genomeElementsCount; i++){
+        result.replace(i, genome2.at(i));
+    }
+    return result;
+}
+
+QVector<QVector<lesson *> > GAlgorithm::mutation(QVector<QVector<lesson *> > genome){
+    QVector<QVector<lesson *> > mutant = generateGenome();
+    int mutationIndex = qrand() % mutant.count();
+    genome.replace(mutationIndex, mutant.at(mutationIndex));
+    return genome;
+}
+
+void GAlgorithm::fitnessSortPopulation(){
+
+    QVector<QVector<lesson *> > temp;
+
+    for (int k = 1; k < m_population.count(); k++){
+        for (int i = 0; i <m_population.count() - k; i++){
+           if(fitnessFunction(m_population[i]) >  fitnessFunction(m_population[i+1])){
+               temp = m_population[i];
+               m_population.replace(i, m_population.at(i+1));
+               m_population.replace(i+1, temp);
+           }
+        }
+    }
+}
+
+//idiotism
+void GAlgorithm::fitnessSortChildren(){
+
+    QVector<QVector<lesson *> > temp;
+
+    for (int k = 1; k < m_ChildPopulation.count(); k++){
+        for (int i = 0; i <m_ChildPopulation.count() - k; i++){
+           if(fitnessFunction(m_ChildPopulation[i]) >  fitnessFunction(m_ChildPopulation[i+1])){
+               temp = m_ChildPopulation[i];
+               m_ChildPopulation.replace(i, m_ChildPopulation.at(i+1));
+               m_ChildPopulation.replace(i+1, temp);
+           }
+        }
+    }
+}
+
+void GAlgorithm::runAlgorithm(int iterationCount){
+
+    if(m_populationCount <= 1){
+        return;
+    }
+
+    for(int i = 0; i < iterationCount; i++){
+
+        //mutation
+        for(int i = 0; i < m_population.count(); i++){
+            m_population.replace(i, mutation(m_population.at(i)));
+        }
+
+        //crossingover
+        for (int k = 0; k < m_population.count(); k++){
+            for (int i = 0; i <m_population.count(); i++){
+               if(k != i){
+                    m_ChildPopulation.push_back(crossoverFunction(m_population.at(k), m_population.at(i)));
+               }
+            }
+        }
+
+        //fitness
+        fitnessSortChildren();
+
+        //selection
+        m_population.remove(0, m_population.count() - 1);
+        m_population.pop_back();
+
+        for(int i = 0; i < m_populationCount; i++){
+            m_population.push_back(m_ChildPopulation.at(i));
+        }
+
+    }
 }
